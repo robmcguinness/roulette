@@ -5,9 +5,9 @@ $(function() {
 	var prizes = [ "iPad 2", "Macbook Pro", "iPhone 4", "Mac Pro", "Mac Mini",
 			"iPod", "Apple TV", "Macbook Air", "Ipod Mini" ];
 
-	// full w/h of html
-	var w = $(document).width();
-	var h = $(document).height();
+
+	var w = $(document).width(); // full w of html
+	var h = $(document).height(); // full h of html
 	var rOuter = h / 2.2; // prevents wheel edge from hitting viewport edge
 	var rInner = rOuter / 2;
 	var strokeWidth = 3;
@@ -62,12 +62,14 @@ $(function() {
 
 		for(var i = 0; i < prizes.length; i++) {
 			var points = getPoints(center.x, center.y, rOuter, rInner, beginAngle, endAngle);
-			debugger;
+
 			var edge1 = drawLine(points, true);
-			var arc1 = drawArc(rOuter, beginAngle, endAngle, color[i % color.length]);
+			debugger;
+			var arc1 = drawArc(rOuter, beginAngle, endAngle, points);
 
 			var edge2 = drawLine(points, false);
-			section.push(paper.path(edge1 + arc1 + edge2 + " z").attr({
+
+			section.push(paper.path(edge1 + arc1 + edge2 + " z").attr({ // z close path
 				stroke: color[i % color.length],
 				"stroke-width" : strokeWidth,
 				fill: color[i % color.length]
@@ -99,8 +101,8 @@ $(function() {
 		});
 	};
 
-	var drawArc = function(radius, startAngle, endAngle, color) {
-		return circularArcPath(radius, startAngle, endAngle);
+	var drawArc = function(radius, startAngle, endAngle, points) {
+		return circularArcPath(radius, startAngle, endAngle, points);
 	};
 
 	var arcPath = function(startX, startY, endX, endY, radius1, radius2, angle) {
@@ -109,13 +111,9 @@ $(function() {
 	};
 
 	var circularArcPath = function(radius, startAngle,
-			endAngle) {
-		var startX = center.x + radius * Math.cos(startAngle * curvePoint);
-		var startY = center.y + radius * Math.sin(startAngle * curvePoint);
-		var endX = center.x + radius * Math.cos(endAngle * curvePoint);
-		var endY = center.y + radius * Math.sin(endAngle * curvePoint);
+			endAngle, points) {
 
-		return arcPath(startX, startY, endX - startX, endY - startY, radius, radius, 0);
+		return arcPath(points.outer.x1, points.outer.y1, points.outer.x2 - points.outer.x1, points.outer.y2 - points.outer.y1, radius, radius, 0);
 	};
 
 	var clearCanvas = function() {
