@@ -60,12 +60,10 @@ $(function() {
 
 		var section = paper.set();
 
-		// prizes.length
 		for(var i = 0; i < prizes.length; i++) {
 			var points = getPoints(center.x, center.y, rOuter, rInner, beginAngle, endAngle);
 			debugger;
 			var edge1 = drawLine(points, true);
-			//section.push(drawLine(points, false));
 			var arc1 = drawArc(rOuter, beginAngle, endAngle, color[i % color.length]);
 
 			var edge2 = drawLine(points, false);
@@ -75,17 +73,7 @@ $(function() {
 				fill: color[i % color.length]
 
 			}));
-			/*
-			//section.push(drawArc(rInner, beginAngle, endAngle, color[i % color.length]));
 
-			/*
-			section.attr({
-				stroke: color[i % color.length],
-				"stroke-width" : strokeWidth,
-				fill: color[i % color.length]
-
-			});
-			*/
 			beginAngle = endAngle;
 			endAngle += sectionAngle;
 		}
@@ -101,15 +89,6 @@ $(function() {
 			_edge = 'L' + points.inner.x2+ ' ' + points.inner.y2;
 		}
 		return _edge;
-		/*
-		var edge = paper.path(_edge);
-		return edge;
-		/*
-		edge.attr({
-			"stroke" : "#E1E1E1",
-			"stroke-width" : strokeWidth
-		});
-		*/
 	};
 
 	var drawCircle = function() {
@@ -121,20 +100,11 @@ $(function() {
 	};
 
 	var drawArc = function(radius, startAngle, endAngle, color) {
-		/*
-		paper.path(circularArcPath(radius, startAngle, endAngle)).attr({
-			stroke : color,
-			"stroke-width" : strokeWidth
-		});
-		*/
-
-		//return paper.path(circularArcPath(radius, startAngle, endAngle));
 		return circularArcPath(radius, startAngle, endAngle);
 	};
 
 	var arcPath = function(startX, startY, endX, endY, radius1, radius2, angle) {
 		var arcSVG = [ radius1, radius2, angle, 0, 1, endX, endY ].join(' ');
-		//return 'M' + startX + ' ' + startY + " a " + arcSVG;
 		return " a " + arcSVG;
 	};
 
