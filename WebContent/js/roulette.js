@@ -12,10 +12,13 @@ $(function() {
 	var rInner = rOuter / 2;
 	var strokeWidth = 1;
 	var sectionAngle = 360 / prizes.length;
+
 	var curvePoint = Math.PI / 180;
 	var color = ["#77A636", "#E0BC32", "#7EC7D0"];
 	var colorArrow = ["#800080", "#FFCEFF"]; // [fill, border]
-	var sections = {};
+	var roulette = {};
+	var sections = [];
+	var labels = [];
 	var random = [1000, 4000];
 
 	// go full screen
@@ -34,6 +37,8 @@ $(function() {
 		var arrow = drawArrow();
 		var el = document.elementFromPoint(center.x+rInner+10, center.y);
 
+
+		/*
 		$("#spin").click(function() {
 			spin();
 		});
@@ -41,6 +46,7 @@ $(function() {
 		$("#stop").click(function() {
 			sections.stop();
 		});
+		*/
 
 	};
 
@@ -71,8 +77,6 @@ $(function() {
 		var beginAngle = 0;
 		var endAngle = sectionAngle;
 
-		sections = paper.set();
-
 		for(var i = 0; i < prizes.length; i++) {
 			var points = getPoints(center.x, center.y, rOuter, rInner, beginAngle, endAngle);
 
@@ -85,11 +89,20 @@ $(function() {
 			var section = paper.path(edge1 + arc1 + edge2 + " z").attr({ // z close path
 				stroke: color[i % color.length],
 				"stroke-width" : strokeWidth,
+				'stroke-linejoin': 'round',
 				fill: color[i % color.length]
 			});
+			section.toBack();
 			section.node.id = 'section'+i;
+			sections[i] = section;
 
-			sections.push(section);
+			var label = drawLabel(prizes[i], beginAngle + sectionAngle/2);
+			label.toFront();
+			label.node.id = 'label'+i;
+			labels[i] = label;
+
+
+			//roulette.push(section);
 
 			/*
 			sections.onAnimation(function () {
@@ -126,6 +139,7 @@ $(function() {
 		var arrow = paper.path("M"+(center.x+rOuter-10)+" "+center.y+"l30 -10l0 20z").attr({
 			stroke: colorArrow[1],
 			"stroke-width": 2,
+			'stroke-linejoin': 'round',
 			fill: colorArrow[0]
 		});
 		arrow.id = "arrow";
@@ -143,6 +157,20 @@ $(function() {
 			"stroke-width" : strokeWidth
 		});
 
+	};
+
+	var drawLabel = function(label, angle, points) {
+
+		var attr = {
+				font: '20px Arial, Helvetica',
+				"text-anchor": 'start',
+				fill: "#282828",
+				opacity: 0.5
+		};
+
+		var text = paper.text(center.x + rInner, center.y, label).attr(attr);
+		text.rotate(angle, center.x, center.y);
+		return text;
 	};
 
 	var drawArc = function(radius, startAngle, endAngle, points) {
@@ -165,7 +193,26 @@ $(function() {
 	};
 
 	var spin = function() {
-		sections.stop().animate({rotation: randomFromTo() + " " + center.x + " " + center.y}, 10000,'>');
+		var degree = randomFromTo();
+
+		//roulette = paper.set();
+		for(var z = 0; z < prizes.length; z++) {
+
+			if(sections[z].attr("rotation")) {
+				debugger;
+				sections[z].stop().animate({ rotation: (degree + +sections[z].attr("rotation").split(" ").shift()) + " " + center.x + " " + center.y}, 10000, '>');
+			}else {
+				sections[z].stop().animate({rotation: degree + " " + center.x + " " + center.y}, 10000,'>');
+			}
+		}
+
+		//roulette.stop().animate({rotation: degree + " " + center.x + " " + center.y}, 10000,'>');
+
+		for (var i = 0; i < prizes.length; i++) {
+		    // node.attr("rotation") returns something like 50 200 200, so we have to split the string and grab the first number with shift
+		    //labels[i].stop().animateWith(roulette, { rotation: (degree + +labels[i].attr("rotation").split(" ").shift()) + " " + center.x + " " + center.y}, 10000, '>');
+			labels[i].stop().animate({ rotation: (degree + +labels[i].attr("rotation").split(" ").shift()) + " " + center.x + " " + center.y}, 10000, '>');
+		}
 	};
 
 	var randomFromTo = function() {
@@ -174,6 +221,16 @@ $(function() {
 	};
 
 	init();
+
+	$(document).keyup(function(evt) {
+	    if (evt.keyCode == 32) {
+	    }
+	  }).keydown(function(evt) {
+	    if (evt.keyCode == 32) {
+	    	spin();
+	    }
+	  });
+
 
 	return {
 		spin: spin
