@@ -199,10 +199,9 @@ $(function() {
 		for(var z = 0; z < prizes.length; z++) {
 
 			if(sections[z].attr("rotation")) {
-				debugger;
-				sections[z].stop().animate({ rotation: (degree + +sections[z].attr("rotation").split(" ").shift()) + " " + center.x + " " + center.y}, 10000, '>');
+				sections[z].stop().animateWith(sections[0], { rotation: (degree + +sections[z].attr("rotation").split(" ").shift()) + " " + center.x + " " + center.y}, 10000, '>');
 			}else {
-				sections[z].stop().animate({rotation: degree + " " + center.x + " " + center.y}, 10000,'>');
+				sections[z].stop().animateWith(sections[0], {rotation: degree + " " + center.x + " " + center.y}, 10000,'>');
 			}
 		}
 
@@ -211,7 +210,7 @@ $(function() {
 		for (var i = 0; i < prizes.length; i++) {
 		    // node.attr("rotation") returns something like 50 200 200, so we have to split the string and grab the first number with shift
 		    //labels[i].stop().animateWith(roulette, { rotation: (degree + +labels[i].attr("rotation").split(" ").shift()) + " " + center.x + " " + center.y}, 10000, '>');
-			labels[i].stop().animate({ rotation: (degree + +labels[i].attr("rotation").split(" ").shift()) + " " + center.x + " " + center.y}, 10000, '>');
+			labels[i].stop().animateWith(sections[0], { rotation: (degree + +labels[i].attr("rotation").split(" ").shift()) + " " + center.x + " " + center.y}, 10000, '>');
 		}
 	};
 
