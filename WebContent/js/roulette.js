@@ -5,7 +5,6 @@ $(function() {
 	var prizes = [ "iPad 2", "Macbook Pro", "iPhone 4", "Mac Pro", "Mac Mini",
 			"iPod", "Apple TV", "Macbook Air", "Ipod Mini" ];
 
-
 	var w = $(document).width(); // full w of html
 	var h = $(document).height(); // full h of html
 	var rOuter = h / 2.2; // prevents wheel edge from hitting viewport edge
@@ -16,10 +15,11 @@ $(function() {
 	var curvePoint = Math.PI / 180;
 	var color = ["#77A636", "#E0BC32", "#7EC7D0"];
 	var colorArrow = ["#800080", "#FFCEFF"]; // [fill, border]
-	var roulette = {};
 	var sections = [];
 	var labels = [];
-	var random = [1000, 4000];
+	var random = [720, 4000];
+	var seconds = 8000;
+	var fontSize = null;
 
 	// go full screen
 	var paper = Raphael(0, 0, w, h);
@@ -31,22 +31,9 @@ $(function() {
 
 	var init = function() {
 
+		drawArrow();
 		drawCircle();
 		drawSections();
-
-		var arrow = drawArrow();
-		var el = document.elementFromPoint(center.x+rInner+10, center.y);
-
-
-		/*
-		$("#spin").click(function() {
-			spin();
-		});
-
-		$("#stop").click(function() {
-			sections.stop();
-		});
-		*/
 
 	};
 
@@ -72,6 +59,13 @@ $(function() {
 		return points;
 	};
 
+	var getFontScale = function(_size) {
+        var scaleSource = _size,
+        	scaleFactor = 0.13;
+        fontSize = scaleSource * scaleFactor; //Multiply the width of the body by the scaling factor:
+
+	};
+
 	var drawSections = function() {
 
 		var beginAngle = 0;
@@ -94,21 +88,16 @@ $(function() {
 			});
 			section.toBack();
 			section.node.id = 'section'+i;
+
+			if(i === 0) {
+				getFontScale(section.getBBox().width);
+			}
 			sections[i] = section;
 
 			var label = drawLabel(prizes[i], beginAngle + sectionAngle/2);
 			label.toFront();
 			label.node.id = 'label'+i;
 			labels[i] = label;
-
-
-			//roulette.push(section);
-
-			/*
-			sections.onAnimation(function () {
-				console.log("test");
-			});
-			*/
 
 			beginAngle = endAngle;
 			endAngle += sectionAngle;
@@ -147,6 +136,7 @@ $(function() {
 
 	};
 
+	/*
 	var drawReferenceLine = function() {
 		var wRect = 20;
 		var topLeftX = center.x + rOuter - (wRect/2);
@@ -158,14 +148,15 @@ $(function() {
 		});
 
 	};
+	*/
 
 	var drawLabel = function(label, angle, points) {
 
 		var attr = {
-				font: '20px Arial, Helvetica',
+				font: fontSize+'px Arial, Helvetica',
 				"text-anchor": 'start',
-				fill: "#282828",
-				opacity: 0.5
+				fill: "#282828"
+
 		};
 
 		var text = paper.text(center.x + rInner, center.y, label).attr(attr);
@@ -188,29 +179,45 @@ $(function() {
 		return arcPath(points.outer.x1, points.outer.y1, points.outer.x2 - points.outer.x1, points.outer.y2 - points.outer.y1, radius, radius, 0);
 	};
 
-	var clearCanvas = function() {
-		paper.clear();
-	};
-
 	var spin = function() {
 		var degree = randomFromTo();
 
-		//roulette = paper.set();
+		sections[0].onAnimation(function() {
+			var el = document.elementFromPoint(center.x + rInner, center.y);
+
+			var _id = el.id.split("section")[1];
+
+			/*
+			if(_id != null && _id != 'undefined') {
+				sections[_id].attr({
+					opacity: .5
+				});
+				currentPrize = _id;
+			}else {
+				for(var i = 0; i < prizez.length; i++) {
+					if(_id*1 === i)
+						continue;
+					sections[_id].attr({
+						opacity: .1
+					});
+				}
+			}
+			*/
+
+		});
+
 		for(var z = 0; z < prizes.length; z++) {
 
 			if(sections[z].attr("rotation")) {
-				sections[z].stop().animateWith(sections[0], { rotation: (degree + +sections[z].attr("rotation").split(" ").shift()) + " " + center.x + " " + center.y}, 10000, '>');
+				sections[z].stop().animateWith(sections[0], { rotation: (degree + +sections[z].attr("rotation").split(" ").shift()) + " " + center.x + " " + center.y}, seconds, '>');
 			}else {
-				sections[z].stop().animateWith(sections[0], {rotation: degree + " " + center.x + " " + center.y}, 10000,'>');
+				sections[z].stop().animateWith(sections[0], {rotation: degree + " " + center.x + " " + center.y}, seconds,'>');
 			}
 		}
 
-		//roulette.stop().animate({rotation: degree + " " + center.x + " " + center.y}, 10000,'>');
-
 		for (var i = 0; i < prizes.length; i++) {
 		    // node.attr("rotation") returns something like 50 200 200, so we have to split the string and grab the first number with shift
-		    //labels[i].stop().animateWith(roulette, { rotation: (degree + +labels[i].attr("rotation").split(" ").shift()) + " " + center.x + " " + center.y}, 10000, '>');
-			labels[i].stop().animateWith(sections[0], { rotation: (degree + +labels[i].attr("rotation").split(" ").shift()) + " " + center.x + " " + center.y}, 10000, '>');
+			labels[i].stop().animateWith(sections[0], { rotation: (degree + +labels[i].attr("rotation").split(" ").shift()) + " " + center.x + " " + center.y}, seconds, '>');
 		}
 	};
 
@@ -219,17 +226,13 @@ $(function() {
 		return number;
 	};
 
-	init();
-
-	$(document).keyup(function(evt) {
-	    if (evt.keyCode == 32) {
-	    }
-	  }).keydown(function(evt) {
+	$(document).keydown(function(evt) {
 	    if (evt.keyCode == 32) {
 	    	spin();
 	    }
-	  });
+	});
 
+	init();
 
 	return {
 		spin: spin
