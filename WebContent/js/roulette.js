@@ -1,25 +1,47 @@
-// finish the line to arc path then close it with fill.
-
 $(function() {
 
-	var prizes = [ "iPad 2", "Macbook Pro", "iPhone 4", "Mac Pro", "Mac Mini",
-			"iPod", "Apple TV", "Macbook Air", "Ipod Mini" ];
+    /*
+	 *
+	 * MODIFY AS NEEDED
+	 *
+	 */
+	var prizes = [
+		"Macbook Pro",
+		"Mac Mini",
+		"iPad",
+		"iPhone",
+		"Macbook\nAir",
+		"Apple TV",
+		"Mac Pro"];
 
+	var scaleFactor = 0.17; // large decimal is bigger font
+	var fontColor = "#FFFFFF" // color of prize text
+	var color = ["#8dc653", "#78bde7", "#d4de57", "#71afac"]; // alternating gaming peice colors
+	var random = [744, 3478]; // [minimum number of rotations in degrees, max number of rotations]
+	var seconds = 8000;  // how long animation runs
+	var colorArrow = ["#000000", "#000000", 4]; // [fill color, border color, border width]
+
+	/*
+	 *
+	 * DO NOT MODIFY
+	 *
+	 */
 	var w = $(document).width(); // full w of html
 	var h = $(document).height(); // full h of html
 	var rOuter = h / 2.2; // prevents wheel edge from hitting viewport edge
-	var rInner = rOuter / 2;
+	var rInner = rOuter * .40;
 	var strokeWidth = 1;
 	var sectionAngle = 360 / prizes.length;
 
 	var curvePoint = Math.PI / 180;
-	var color = ["#77A636", "#E0BC32", "#7EC7D0"];
-	var colorArrow = ["#800080", "#FFCEFF"]; // [fill, border]
+
+	var arrow = null;
 	var sections = [];
 	var labels = [];
-	var random = [720, 4000];
-	var seconds = 8000;
-	var fontSize = null;
+
+
+	var fontSize = null; // used by app to calculate scale don't touch
+	var selected = null;
 
 	// go full screen
 	var paper = Raphael(0, 0, w, h);
@@ -31,9 +53,17 @@ $(function() {
 
 	var init = function() {
 
-		drawArrow();
-		drawCircle();
+		$(document).keydown(function(evt) {
+		    if (evt.keyCode == 32) {
+		    	spin();
+		    }
+		});
+
+		$logo = $('#logo');
+		$logo.width(rOuter);
+
 		drawSections();
+		arrow = drawArrow();
 
 	};
 
@@ -60,8 +90,7 @@ $(function() {
 	};
 
 	var getFontScale = function(_size) {
-        var scaleSource = _size,
-        	scaleFactor = 0.13;
+        var scaleSource = _size;
         fontSize = scaleSource * scaleFactor; //Multiply the width of the body by the scaling factor:
 
 	};
@@ -88,13 +117,14 @@ $(function() {
 			});
 			section.toBack();
 			section.node.id = 'section'+i;
+			section.node.zIndex = 0;
 
 			if(i === 0) {
 				getFontScale(section.getBBox().width);
 			}
 			sections[i] = section;
 
-			var label = drawLabel(prizes[i], beginAngle + sectionAngle/2);
+			var label = drawLabel(prizes[i], beginAngle + sectionAngle/2, i);
 			label.toFront();
 			label.node.id = 'label'+i;
 			labels[i] = label;
@@ -125,41 +155,35 @@ $(function() {
 	};
 
 	var drawArrow = function() {
-		var arrow = paper.path("M"+(center.x+rOuter-10)+" "+center.y+"l30 -10l0 20z").attr({
+		var arrowWidth = rOuter / 7;
+		var arrowHeight  = arrowWidth / 3;
+		var arrow = paper.path("M"+(center.x+rOuter-arrowHeight)+" "+center.y+"l "+arrowWidth+" -"+arrowHeight+" l 0 "+(arrowHeight*2)+" z").attr({
 			stroke: colorArrow[1],
-			"stroke-width": 2,
+			"stroke-width": 4,
 			'stroke-linejoin': 'round',
 			fill: colorArrow[0]
 		});
-		arrow.id = "arrow";
+		arrow.toFront();
+		arrow.node.id = "arrow";
+		arrow.node.zIndex = 100;
 		return arrow;
 
 	};
 
-	/*
-	var drawReferenceLine = function() {
-		var wRect = 20;
-		var topLeftX = center.x + rOuter - (wRect/2);
-		var topLeftY = center.y - (wRect/2);
-
-		var refLine = paper.path("M"+center.x + " " + center.y+"L"+(center.x+rOuter+10)+" " + center.y).attr({
-			"stroke" : "#0066CC",
-			"stroke-width" : strokeWidth
-		});
-
-	};
-	*/
-
-	var drawLabel = function(label, angle, points) {
+	var drawLabel = function(label, angle, points, i) {
 
 		var attr = {
 				font: fontSize+'px Arial, Helvetica',
 				"text-anchor": 'start',
-				fill: "#282828"
+				fill: fontColor,
+				"font-weight": "bold"
 
 		};
 
-		var text = paper.text(center.x + rInner, center.y, label).attr(attr);
+		var text = paper.text(center.x + rInner + 10, center.y, label).attr(attr);
+		text.node.id = 'text'+i;
+		text.node.zIndex = 10;
+		//text.node.setAttribute("filter", "url('filters.svg#dropShadow')");
 		text.rotate(angle, center.x, center.y);
 		return text;
 	};
@@ -182,36 +206,31 @@ $(function() {
 	var spin = function() {
 		var degree = randomFromTo();
 
-		sections[0].onAnimation(function() {
-			var el = document.elementFromPoint(center.x + rInner, center.y);
+		if(selected) {
+			selected.attr({
+				"stroke-width": strokeWidth
+			});
+			arrow.show();
+			var label = document.getElementById("label"+selected.node.id.split("section")[1]);
+	    	selected.toBack();
 
-			var _id = el.id.split("section")[1];
-
-			/*
-			if(_id != null && _id != 'undefined') {
-				sections[_id].attr({
-					opacity: .5
-				});
-				currentPrize = _id;
-			}else {
-				for(var i = 0; i < prizez.length; i++) {
-					if(_id*1 === i)
-						continue;
-					sections[_id].attr({
-						opacity: .1
-					});
-				}
-			}
-			*/
-
-		});
+		}
 
 		for(var z = 0; z < prizes.length; z++) {
 
 			if(sections[z].attr("rotation")) {
-				sections[z].stop().animateWith(sections[0], { rotation: (degree + +sections[z].attr("rotation").split(" ").shift()) + " " + center.x + " " + center.y}, seconds, '>');
+				if(z === 0) {
+					sections[z].stop().animate({ rotation: (degree + +sections[z].attr("rotation").split(" ").shift()) + " " + center.x + " " + center.y}, seconds, '>', highlight);
+				}else {
+					sections[z].stop().animateWith(sections[0], { rotation: (degree + +sections[z].attr("rotation").split(" ").shift()) + " " + center.x + " " + center.y}, seconds, '>');
+				}
 			}else {
-				sections[z].stop().animateWith(sections[0], {rotation: degree + " " + center.x + " " + center.y}, seconds,'>');
+				if(z === 0) {
+					sections[z].stop().animate({rotation: degree + " " + center.x + " " + center.y}, seconds,'>', highlight);
+				}
+				else {
+					sections[z].stop().animateWith(sections[0], {rotation: degree + " " + center.x + " " + center.y}, seconds,'>');
+				}
 			}
 		}
 
@@ -221,16 +240,28 @@ $(function() {
 		}
 	};
 
+	var highlight = function() {
+		var section = document.elementFromPoint(center.x+rInner + 2, center.y);
+
+	    if(section.raphael) {
+	    	selected = section.raphael;
+	    	//section.raphael.toBack();
+	    	var label = document.getElementById("label"+section.id.split("section")[1]);
+	    	arrow.hide();
+	    	section.raphael.toFront();
+	    	label.raphael.toFront();
+			section.raphael.animate({"stroke-width": 30}, 2000, "elastic");
+
+		}
+
+	};
+
 	var randomFromTo = function() {
-		var number = Math.floor(Math.random() * (random[0] - random[1] + 1) + random[1]);
+		var number = Math.floor(Math.random() * (random[0] - random[1]) + random[1]);
+
 		return number;
 	};
 
-	$(document).keydown(function(evt) {
-	    if (evt.keyCode == 32) {
-	    	spin();
-	    }
-	});
 
 	init();
 
