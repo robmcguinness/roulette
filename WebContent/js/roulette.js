@@ -6,13 +6,14 @@ $(function() {
 	 *
 	 */
 	var prizes = [
-		"Macbook Pro",
-		"Mac Mini",
+		"Macbook\nPro",
+		"Mac\nMini",
 		"iPad",
 		"iPhone",
-		"Macbook\nAir",
+		"Macbook\n	Air",
 		"Apple TV",
-		"Mac Pro"];
+		"Mac Pro",
+		"Bean"];
 
 	var scaleFactor = 0.17; // large decimal is bigger font
 	var fontColor = "#FFFFFF" // color of prize text
