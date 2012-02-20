@@ -12,3 +12,14 @@ License
 -------
 
 Free for all.
+
+Preview
+-------
+
+Start:</br>
+
+<img src="https://github.com/robmcguinness/roulette/raw/master/roulette.png"/>
+
+End:</br>
+
+<img src="https://github.com/robmcguinness/roulette/raw/master/roulette-finish.png"/>
