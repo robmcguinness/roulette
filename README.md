@@ -1,20 +1,16 @@
-Roulette
-=========
+# Roulette
 
-Simple roulette gaming board.  Runs best in Chrome.
+Simple roulette gaming board.  Runs best in Chrome.  Hit the `spacebar` to see the wheel spin.
 
-Dependencies
-------------
+## Dependencies
+
 * [Raphael] (http://raphaeljs.com/)
 * [JQuery 1.6.1] (http://jquery.com/)
 
-License
--------
-
+## License
 Free for all.
 
-Preview
--------
+## Preview
 
 Start:</br>
 
